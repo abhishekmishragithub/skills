@@ -15,9 +15,9 @@ npx skills add smallest-inc/skills
 | [text-to-speech](./text-to-speech) | Generate 44.1 kHz speech with Lightning v3.1 / v3.1 Pro — 12 languages, voice cloning, ~100ms streaming |
 | [speech-to-text](./speech-to-text) | Transcribe audio with Pulse (38 languages, 64ms TTFT streaming) and Pulse Pro (leaderboard-ranked English) |
 | [llm-electron](./llm-electron) | Chat completions with Electron — OpenAI-compatible drop-in, sub-300ms TTFT, 70 languages, voice-agent tool calling, automatic prefix caching |
+| [voice-agents](./voice-agents) | Build and operate Atoms voice agents — create agents, outbound calls, campaigns, knowledge bases, conversation logs |
+| [speech-to-speech](./speech-to-speech) | Realtime full-duplex voice conversations with Hydra — audio in, audio out, one WebSocket, built-in barge-in |
 | [setup-api-key](./setup-api-key) | Obtain and configure a Smallest AI API key |
-
-More coming: voice agents (Atoms), speech-to-speech (Hydra).
 
 ## Configuration
 
@@ -36,6 +36,7 @@ Get one at [app.smallest.ai/dashboard](https://app.smallest.ai/dashboard) → De
 | TTS | `lightning_v3.1` (default), `lightning_v3.1_pro` | `lightning-v2`, `lightning-large` |
 | STT | `pulse`, `pulse-pro` | — |
 | LLM | `electron` | — |
+| S2S | `hydra` | — |
 
 ## SDKs & Integrations
 
