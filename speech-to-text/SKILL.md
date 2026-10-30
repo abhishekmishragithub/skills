@@ -14,6 +14,8 @@ compatibility: Requires internet access and a Smallest AI API key (SMALLEST_API_
 Transcribe pre-recorded audio over HTTP or live audio over WebSocket (64ms time-to-first-transcript).
 
 > **Setup:** Requires `SMALLEST_API_KEY` — see the `setup-api-key` skill.
+>
+> **Building a voice agent?** Use the `voice-agent-stt` skill instead. It covers turn handling, the framework plugins, region routing and browser auth, which this skill does not.
 
 ## Models — pick by use case
 

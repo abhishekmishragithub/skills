@@ -16,6 +16,7 @@ npx skills add smallest-inc/skills
 | [speech-to-text](./speech-to-text) | Transcribe audio with Pulse (38 languages, 64ms TTFT streaming) and Pulse Pro (leaderboard-ranked English) |
 | [llm-electron](./llm-electron) | Chat completions with Electron — OpenAI-compatible drop-in, sub-300ms TTFT, 70 languages, voice-agent tool calling, automatic prefix caching |
 | [voice-agents](./voice-agents) | Build and operate Atoms voice agents — create agents, outbound calls, campaigns, knowledge bases, conversation logs |
+| [voice-agent-stt](./voice-agent-stt) | Put Pulse STT inside a voice agent: LiveKit, Pipecat, custom Python, Node or browser, with turn handling, region routing and browser auth |
 | [speech-to-speech](./speech-to-speech) | Realtime full-duplex voice conversations with Hydra — audio in, audio out, one WebSocket, built-in barge-in |
 | [setup-api-key](./setup-api-key) | Obtain and configure a Smallest AI API key |
 
