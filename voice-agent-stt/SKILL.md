@@ -30,7 +30,7 @@ Read the answers off the existing integration first: the current STT call usuall
 1. **Where does the audio come from?** A server the user controls (backend, telephony bridge, agent worker), or a browser or mobile client. This decides authentication: a browser must never hold the permanent API key.
 2. **Audio format.** 16 kHz PCM (default for agent frameworks), 8 kHz telephony (`mulaw` or `alaw`), or Opus. This decides `encoding` and `sample_rate`, and whether the pre-roll warning in `references/failure-modes.md` applies.
 3. **Who decides the turn is over?** Our server endpointing (default, simplest), or the caller's own VAD or end-of-turn model, which then sends `{"type":"finalize"}`. There is no third option: server endpointing cannot be switched off in a way that leaves the client authoritative. See `references/turn-state.md`.
-4. **Language**, and whether callers code-switch. This decides `language` and, for region-gated languages, the hostname. See the region table in `references/config-knobs.md`.
+4. **Language**, and whether callers code-switch. English-only agents can also consider `model=pulse-2`, which decides turn boundaries with a model instead of a silence window and returns emotion and gender on every final; see the model comparison in `references/config-knobs.md` for the trade-off. This decides `language` and, for region-gated languages, the hostname. See the region table in `references/config-knobs.md`.
 5. **Domain phrases to bias.** Names, products, expected reply words. Becomes `keywords`. Read the weighting rules in `references/config-knobs.md` before choosing values, and the alias trap in `references/common-mistakes.md`.
 
 ## Step 3. Wire the integration

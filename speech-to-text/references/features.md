@@ -9,8 +9,8 @@ All features are enabled via query parameters on `POST /waves/v1/stt/` or the `w
 | Utterances | Sentence-level segments with speaker labels | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/utterances |
 | Language detection | Auto-detect across 38 languages | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/language-detection |
 | PII / PCI redaction | Auto-redact sensitive info from transcripts. The `redacted_entities` array does not arrive on streaming | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/redaction |
-| Emotion detection | Per-emotion confidence scores. **Pre-recorded only**: accepted on the streaming connection but no `emotion` field comes back | https://docs.smallest.ai/models/speech-to-text/features/emotion-detection |
-| Gender detection | Speaker gender prediction. **Pre-recorded only**: accepted on the streaming connection but no `gender` field comes back | https://docs.smallest.ai/models/speech-to-text/features/gender-detection |
+| Emotion detection | Per-emotion confidence scores. Pre-recorded, and streaming on `model=pulse-2` where it is on by default. Nothing comes back on `model=pulse` | https://docs.smallest.ai/models/speech-to-text/features/emotion-detection |
+| Gender detection | Speaker gender prediction. Pre-recorded, and streaming on `model=pulse-2` where it is on by default. Nothing comes back on `model=pulse` | https://docs.smallest.ai/models/speech-to-text/features/gender-detection |
 | Keyword boosting | Boost domain words/phrases for correct recognition | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/keyword-boosting |
 | Punctuation formatting | Control punctuation/capitalization in real time | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/punctuation-formatting |
 | Inverse text normalization | Spoken form → written form ("five dollars" → "$5") | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/inverse-text-normalization |

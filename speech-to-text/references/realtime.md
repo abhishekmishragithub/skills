@@ -10,7 +10,12 @@ Building a voice agent, where turns have to be committed to an LLM? Use the `voi
 wss://api.smallest.ai/waves/v1/stt/live?model=pulse
 ```
 
-`model=pulse` is required. `pulse-pro` is pre-recorded only and is rejected with HTTP 400 before the WebSocket upgrades.
+Two streaming models:
+
+- `model=pulse`, 38 languages, the general choice.
+- `model=pulse-2`, English only, with built-in end-of-turn detection and per-utterance emotion and gender on every final. See the [Pulse 2.0 model card](https://docs.smallest.ai/model-cards/speech-to-text/pulse-2-0).
+
+`pulse-pro` is pre-recorded only and is rejected with HTTP 400 before the WebSocket upgrades.
 
 `api.smallest.ai` routes to the nearest region. Some languages are served from one region only, so for those use the regional host directly: `wss://api.us.smallest.ai/...` for `zh`, `yue`, `ja`, `ko`, `multi-asian`, and `wss://api.india.smallest.ai/...` for `ta`, `te`, `kn`, `ml`, `multi-south-indic`.
 
@@ -113,8 +118,13 @@ Verified against the live endpoint. Several parameters are accepted on the conne
 | `diarize` | Returns `diarization_segments[]`, and a `speaker` on each word |
 | `keywords` | Applies |
 | `redact_pii`, `redact_pci` | Applies to the transcript text. The `redacted_entities` array is documented but does not arrive |
-| `full_transcript` | Accepted, but no `full_transcript` field comes back. Accumulate on your side |
-| `emotion_detection`, `gender_detection` | Accepted, but no `emotion` or `gender` field comes back. Use the pre-recorded endpoint |
+| `emotion_detection`, `gender_detection` | Nothing on `model=pulse`. These are Pulse 2.0 features, on by default there |
+
+## Pulse 2.0
+
+`model=pulse-2` is English-only and closes finals on turn boundaries decided by a built-in model rather than a silence window, so finals are fewer and longer. There are no endpointing knobs to tune: `eou_timeout_ms` and `endpointing` do not apply. Every final also carries `emotion` and `gender` objects with a label, a confidence and the full score distribution, plus `eot_finalized: true`, and diarization is on by default.
+
+Set `eot_events=true` to also receive the live per-tick end-of-turn stream, which carries `p` and `fired`. Off by default, since the finals already tell you the turn closed.
 
 ## Real-time controls
 
