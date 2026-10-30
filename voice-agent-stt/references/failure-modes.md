@@ -53,7 +53,7 @@ An agent that handles short replies correctly on headset audio can still lose th
 
 Fixes, in order of impact:
 
-1. Send 200 to 300 ms of audio from before speech onset. If your VAD gates the stream, buffer and prepend.
+1. Send at least 300 ms of audio from before speech onset, and 500 ms on 8 kHz telephony audio, which is the figure the table above was measured at. If your VAD gates the stream, buffer and prepend.
 2. Test with noise suppression and AGC off first. Aggressive onset processing clips word starts.
 3. Put the expected reply grammar in `keywords` (`yes:3,no:3,one:2,two:2,...`).
 4. Set `itn_normalize=false` on short-reply connections.

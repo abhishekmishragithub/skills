@@ -17,7 +17,8 @@ IDLE ──speech_started──▶ USER_SPEAKING ──speech_ended──▶ WAI
 4. **`speech_started` stops TTS, and nothing else.** Barge-in is a playback decision. The turn is still committed on the final.
 5. **`{"type":"finalize"}` is edge-triggered.** Send it once per turn, on an external certainty event: your VAD or end-of-turn model fired, the caller released push-to-talk, the dialog decided the turn is done. Never on a partial that "looks stable".
 6. **Keep streaming audio for at least 300 ms after the speaker stops before sending `finalize`.** Sending it immediately truncates the last word.
-7. **Match the final to your `finalize` using `from_finalize`.** The response to a client `finalize` carries `from_finalize: true`. There is exactly one per finalize, and it can be empty when everything had already been finalized, so treat an empty one as an acknowledgement rather than a turn.
+7. **Server endpointing is a floor, not something `finalize` overrides.** With `endpointing=true`, which these profiles keep on, the server's own final frequently lands before your `finalize` does on short and medium turns. When that happens the commit carries `from_finalize: false` and your finalize comes back as an empty acknowledgement. Your detector only buys latency when it is confident earlier than the endpointing window, so treat `finalize` as "commit sooner when I am sure", not as "I own the boundary".
+8. **Match the final to your `finalize` using `from_finalize`.** The response to a client `finalize` carries `from_finalize: true`. There is exactly one per finalize, and it can be empty when everything had already been finalized, so treat an empty one as an acknowledgement rather than a turn.
 
 ## Timing to expect
 

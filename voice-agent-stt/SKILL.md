@@ -74,7 +74,7 @@ Run `scripts/verify.py` with the chosen configuration. It streams the bundled sa
 
 Verify the configuration you are actually shipping, including how it authenticates.
 
-Pass the flags you are actually shipping. The script's defaults are the server's defaults, not a profile, so anything you set on the connection you should set here too.
+Pass the flags you are actually shipping. The script starts from the profiles in this skill rather than the raw server defaults, so `finalize_on_words` is off and `vad_events` is on unless you say otherwise. Anything you set on the connection, set here too.
 
 ```
 # server-side client, open-ended profile
@@ -84,14 +84,15 @@ python scripts/verify.py --language en --itn-normalize true --keywords "Acme Ban
 # which is the only form a browser can use
 python scripts/verify.py --language en --itn-normalize true --keywords "Acme Bank:3" --token --query-auth
 
-# telephony: the bundled sample is converted, so the mulaw path is really tested
-python scripts/verify.py --language en --encoding mulaw --sample-rate 8000
+# telephony: streams a pre-encoded 8 kHz G.711 sample, or pass --sample with
+# a raw .ulaw/.alaw file to check against one of your own call recordings
+python scripts/verify.py --language en --encoding mulaw --itn-normalize false --keywords "Acme Bank:3"
 
 # a region-gated language
 python scripts/verify.py --host api.us.smallest.ai --language ja --expect ""
 ```
 
-A pass means auth, region, the parameters you passed, and the audio path all work together. Do not report the integration as done before the command matching your auth mode passes.
+A pass means auth, region, the parameters you passed, and the audio path all work together. It does not prove your keywords changed anything: the bundled sample does not contain them. To check biasing, run it again with `--sample` and a recording that does. Do not report the integration as done before the command matching your auth mode passes.
 
 On LiveKit and Pipecat the plugin decides the final parameter set, and it is not the same list this script sends. A pass proves the account, region and audio path; it does not prove the plugin is sending the profile you intended. Confirm that by running the agent and checking a transcript.
 

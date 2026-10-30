@@ -29,8 +29,8 @@ Do not use the default host for a region-gated language. Because it is latency-r
 | Client | Form |
 | --- | --- |
 | Server-side | `Authorization: Bearer <SMALLEST_API_KEY>` |
-| Browser or mobile | `Authorization: Bearer <short-lived token>` |
-| Browser using `new WebSocket()` | `?api_key=<short-lived token>` |
+| Mobile or native, which can set headers | `Authorization: Bearer <short-lived token>` |
+| Browser, using `new WebSocket()` | `?api_key=<short-lived token>` |
 
 The `api_key` query parameter also accepts a permanent API key. Do not use it that way from a browser: the key would be visible in the page, in the URL, and in every log along the path.
 

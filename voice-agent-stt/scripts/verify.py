@@ -75,24 +75,32 @@ async def run(args: argparse.Namespace) -> int:
         print("verify: FAIL SMALLEST_API_KEY is not set", file=sys.stderr)
         return 1
 
-    pcm, rate = load_sample(Path(args.sample) if args.sample else SAMPLE)
-
     # Match the customer's real audio format so the check exercises their path.
-    if args.encoding in TELEPHONY_SAMPLES and not args.sample:
-        asset = TELEPHONY_SAMPLES[args.encoding]
+    if args.encoding in TELEPHONY_SAMPLES:
+        # G.711 is one byte per sample and already encoded, so nothing is read
+        # from the 16 kHz WAV on this path. --sample takes a raw .ulaw/.alaw
+        # file, which is how you check against your own call recording.
+        rate = int(args.sample_rate) if args.sample_rate else 8000
+        if args.sample:
+            asset = Path(args.sample)
+            if asset.suffix.lower() in (".wav", ".wave"):
+                sys.exit(f"verify: --encoding {args.encoding} needs raw G.711 bytes, not a WAV. "
+                         f"Convert first: ffmpeg -i {args.sample} -ar {rate} -ac 1 "
+                         f"-f {args.encoding} out.{'ulaw' if args.encoding == 'mulaw' else 'alaw'}")
+        else:
+            asset = TELEPHONY_SAMPLES[args.encoding]
+            if args.sample_rate and int(args.sample_rate) != 8000:
+                sys.exit(f"verify: the bundled {args.encoding} sample is 8000 Hz, not {args.sample_rate}. "
+                         "Pass --sample with your own raw G.711 file at that rate.")
+            rate = 8000
         if not asset.exists():
-            sys.exit(f"verify: missing bundled sample {asset}")
-        rate = 8000
-        if args.sample_rate and int(args.sample_rate) != rate:
-            sys.exit(f"verify: the bundled {args.encoding} sample is 8000 Hz, not {args.sample_rate}")
+            sys.exit(f"verify: {asset} not found")
         body = asset.read_bytes()
         silence = b"\xff" if args.encoding == "mulaw" else b"\xd5"
         audio = silence * int(rate * 0.3) + body + silence * int(rate * 1.0)
         bytes_per_sample = 1
-    elif args.encoding in TELEPHONY_SAMPLES:
-        sys.exit(f"verify: --sample with --encoding {args.encoding} is not supported; "
-                 "the bundled telephony samples are already encoded")
     else:
+        pcm, rate = load_sample(Path(args.sample) if args.sample else SAMPLE)
         if args.sample_rate and int(args.sample_rate) != rate:
             sys.exit(
                 f"verify: cannot convert the sample from {rate} Hz to {args.sample_rate} Hz. "
@@ -102,7 +110,7 @@ async def run(args: argparse.Namespace) -> int:
         bytes_per_sample = 2
 
     params = {
-        "model": "pulse",
+        "model": args.model,
         "language": args.language,
         "sample_rate": str(rate),
         "encoding": args.encoding,
@@ -111,8 +119,8 @@ async def run(args: argparse.Namespace) -> int:
         "capitalize": "true",
         "itn_normalize": args.itn_normalize,
         "endpointing": args.endpointing,
-        "finalize_on_words": "false",
-        "vad_events": "true",
+        "finalize_on_words": args.finalize_on_words,
+        "vad_events": args.vad_events,
     }
     if args.eou_timeout_ms is not None:
         params["eou_timeout_ms"] = str(args.eou_timeout_ms)
@@ -124,6 +132,13 @@ async def run(args: argparse.Namespace) -> int:
         k, _, v = extra.partition("=")
         params[k] = v
 
+    if args.query_auth and not args.token:
+        print(
+            "verify: refusing to put a permanent API key in the URL. The query form is for "
+            "short-lived tokens, which is what a browser should use. Add --token.",
+            file=sys.stderr,
+        )
+        return 1
     credential = mint_token(args.host, api_key) if args.token else api_key
     url = f"wss://{args.host}/waves/v1/stt/live?{urlencode(params)}"
     print(f"→ wss://{args.host}/waves/v1/stt/live")
@@ -246,6 +261,12 @@ def main() -> int:
     p.add_argument("--host", default="api.smallest.ai",
                    help="api.smallest.ai (default), api.us.smallest.ai, api.india.smallest.ai")
     p.add_argument("--language", default="en")
+    p.add_argument("--model", default="pulse", choices=["pulse", "pulse-2"],
+                   help="pulse is the recommended model for voice agents.")
+    p.add_argument("--vad-events", default="true", choices=["true", "false"],
+                   help="the profiles turn this on; the server default is false.")
+    p.add_argument("--finalize-on-words", default="false", choices=["true", "false"],
+                   help="the profiles turn this off; the server default is true.")
     p.add_argument("--encoding", default="linear16",
                    choices=["linear16", "mulaw", "alaw"],
                    help="mulaw and alaw stream a pre-encoded 8 kHz sample, so a telephony "
@@ -265,7 +286,8 @@ def main() -> int:
     p.add_argument("--token", action="store_true", help="mint and use a short-lived access token")
     p.add_argument("--query-auth", action="store_true",
                    help="send the credential as ?api_key= instead of a header (what a browser does)")
-    p.add_argument("--sample", help="override the bundled WAV (mono 16-bit PCM)")
+    p.add_argument("--sample", help="your own audio instead of the bundled sample: a mono "
+                                    "16-bit PCM WAV, or raw G.711 bytes with --encoding mulaw/alaw")
     p.add_argument("--expect", default=DEFAULT_EXPECT,
                    help="comma-separated words the transcript must contain. Empty disables the check.")
     p.add_argument("--timeout", type=float, default=45)
