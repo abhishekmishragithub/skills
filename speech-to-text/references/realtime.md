@@ -12,8 +12,8 @@ wss://api.smallest.ai/waves/v1/stt/live?model=pulse
 
 Two streaming models:
 
-- `model=pulse`, 38 languages, the general choice.
-- `model=pulse-2`, English only, with built-in end-of-turn detection and per-utterance emotion and gender on every final. See the [Pulse 2.0 model card](https://docs.smallest.ai/model-cards/speech-to-text/pulse-2-0).
+- `model=pulse`, 38 languages. The default choice, and the one to use for voice agents.
+- `model=pulse-2`, English only. Choose it when you specifically want per-utterance emotion and gender, or its built-in end-of-turn detection. See the [Pulse 2.0 model card](https://docs.smallest.ai/model-cards/speech-to-text/pulse-2-0).
 
 `pulse-pro` is pre-recorded only and is rejected with HTTP 400 before the WebSocket upgrades.
 
@@ -122,7 +122,7 @@ Verified against the live endpoint. Several parameters are accepted on the conne
 
 ## Pulse 2.0
 
-`model=pulse-2` is English-only and closes finals on turn boundaries decided by a built-in model rather than a silence window, so finals are fewer and longer. There are no endpointing knobs to tune: `eou_timeout_ms` and `endpointing` do not apply. Every final also carries `emotion` and `gender` objects with a label, a confidence and the full score distribution, plus `eot_finalized: true`, and diarization is on by default.
+`model=pulse-2` is English-only. It closes finals on turn boundaries decided by a built-in model rather than a silence window, so finals are fewer and longer, and there are no endpointing knobs to tune: `eou_timeout_ms` and `endpointing` do not apply. It is the right pick when you want emotion, gender or end-of-turn detection out of the box, rather than a general replacement for `pulse`. Every final also carries `emotion` and `gender` objects with a label, a confidence and the full score distribution, plus `eot_finalized: true`, and diarization is on by default.
 
 Set `eot_events=true` to also receive the live per-tick end-of-turn stream, which carries `p` and `fired`. Off by default, since the finals already tell you the turn closed.
 
