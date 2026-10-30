@@ -4,7 +4,13 @@ Everything the streaming WebSocket accepts. All of it is set as query parameters
 
 ## Endpoint and region
 
-Path is `/waves/v1/stt/live`. `model=pulse` is required; it is the only streaming model. `pulse-pro` is rejected with HTTP 400 before the upgrade, and is HTTP-only.
+Path is `/waves/v1/stt/live`.
+
+**Use `model=pulse`.** It is the recommended model for voice agents and the one this skill configures throughout: 38 languages, and the turn boundary is yours to tune through `endpointing` and `eou_timeout_ms`.
+
+`model=pulse-2` is a different trade, not an upgrade. Reach for it only when the agent specifically needs per-utterance emotion and gender, or its built-in end-of-turn detection, and English-only is acceptable. It exposes no endpointing knobs, and its finals carry `eot_finalized: true` alongside `emotion` and `gender` objects. If you do use it, check segmentation against your own audio first: on the clip used throughout this skill it split the final word across two finals on 5 of 5 runs, where `pulse` at its defaults returned one clean final.
+
+`pulse-pro` is pre-recorded only and is rejected with HTTP 400 before the upgrade.
 
 | Host | Use for |
 | --- | --- |
