@@ -37,7 +37,7 @@ Drop it into the pipeline where the previous STT service was. If adding the extr
 
 **Settings it exposes** (1.15.0): `language`, `word_timestamps`, `full_transcript`, `sentence_timestamps`, `redact_pii`, `redact_pci`, `numerals`, `diarize`, `endpointing`, `keywords`, `format`, `itn_normalize`, `no_format_delay`, `emotion_detection`, `gender_detection`, plus `model` on the constructor.
 
-**Not exposed:** `eou_timeout_ms`, `vad_events`, `punctuate`, `capitalize`, `external_session_id`, `finalize_on_words`. The last one matters for open-ended turns, because it leaves the server default of `true` in place and a long turn can be split by word count.
+**Not exposed:** `eou_timeout_ms`, `endpointing_timeout_ms`, `vad_events`, `finalize_on_words`, `max_words`, `punctuate`, `capitalize`, `external_session_id`. `finalize_on_words` matters for open-ended turns, because it leaves the server default of `true` in place and a long turn can be split by word count.
 
 **VAD setting that matters.** Sending `finalize` too soon after the speaker stops truncates the last word. Pipecat's Silero analyzer defaults to `stop_secs=0.2`, which is on the edge. Set it to at least 0.3:
 
@@ -85,7 +85,7 @@ Reproducible every run at `300`, clean at `600` and above and when the parameter
 
 `eou_timeout_ms` now defaults to `None`, which means the server default of 800, so there is no longer any need to pass it.
 
-**Options it exposes** (1.8.10): `model`, `language`, `sample_rate`, `encoding`, `word_timestamps`, `diarize`, `eou_timeout_ms`, `endpointing`, `endpointing_timeout_ms`, `itn_normalize`, `numerals`, `finalize_on_words`, `max_words`, `finalize_on_flush`, `keywords`, `format`, `sentence_timestamps`, `redact_pii`, `redact_pci`, `keepalive_interval`, `stream_path`, plus `api_key`, `http_session` and `base_url`.
+**Options it exposes** (1.8.10): `model`, `language`, `sample_rate`, `encoding`, `word_timestamps`, `diarize`, `eou_timeout_ms`, `endpointing`, `endpointing_timeout_ms`, `vad_events`, `itn_normalize`, `numerals`, `finalize_on_words`, `max_words`, `finalize_on_flush`, `keywords`, `format`, `sentence_timestamps`, `redact_pii`, `redact_pci`, `keepalive_interval`, `stream_path`, plus `api_key`, `http_session` and `base_url`.
 
 **Not exposed:** `punctuate`, `capitalize`, `external_session_id`, `full_transcript`. `punctuate` and `capitalize` default to `true` on the server, which is what the profiles want anyway.
 
@@ -99,7 +99,7 @@ Dropping `/waves/v1` yields `wss://api.us.smallest.ai/stt/live` and the connecti
 
 **Trimming the leading space** has to happen somewhere that changes what reaches the LLM. `AgentSession`'s `user_input_transcribed` event is observational, so trimming there is a no-op. Override `stt_node` on your `Agent` instead and clean each event as it passes through.
 
-**Turn detection.** The plugin does not send `finalize`; it relies on server endpointing, and LiveKit's own turn detector sits on top of the finals it emits. Keep `endpointing=True`.
+**Turn detection.** The plugin sends `{"type":"finalize"}` on every framework flush, because `finalize_on_flush` defaults to `True`, and `{"type":"close_stream"}` when the stream shuts down. Server endpointing still decides the ordinary turn boundary, and LiveKit's own turn detector sits on top of the finals it emits. Keep `endpointing=True`.
 
 **Checking it offline.** The plugin needs a job context, so calling `.stream()` from a script raises `RuntimeError: Attempted to use an http session outside of a job context`. Wrap the check:
 
@@ -117,7 +117,7 @@ Reading back `stream._ws_url()` is the quickest way to confirm the plugin is sen
 
 A leading period can survive a mid-sentence split on either plugin, so trim it somewhere that changes what reaches the LLM. Pipecat already strips the leading space; the LiveKit plugin does not.
 
-Neither plugin implements all of the turn-state rules on its own. The Pipecat one does not send `close_stream` and swallows server error frames; the LiveKit one does not send `finalize` at all. Read the per-plugin notes above before promising a customer a behaviour from `turn-state.md`.
+Neither plugin implements all of the turn-state rules on its own. The Pipecat one does not send `close_stream` and swallows server error frames. The LiveKit one sends both control messages but exposes no hook for inspecting the raw frames, so an empty final or an `is_last` transcript is indistinguishable from any other final at the framework layer. Read the per-plugin notes above before promising a customer a behaviour from `turn-state.md`.
 
 ## Other frameworks
 

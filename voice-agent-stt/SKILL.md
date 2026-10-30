@@ -146,7 +146,7 @@ Most telephony agents carry both: account numbers and open questions on the same
 
 ### These profiles are a server-side parameter list
 
-They describe what the connection should carry. A generated client can set all of it. The official plugins each expose a subset: as of 1.8.10 the LiveKit plugin covers almost everything except `punctuate`, `capitalize`, `external_session_id` and `full_transcript`, while the Pipecat plugin at 1.15.0 does not reach `eou_timeout_ms`, `vad_events`, `punctuate`, `capitalize`, `external_session_id` or `finalize_on_words`. Before promising a customer a profile line on LiveKit or Pipecat, check the exposed lists in `references/frameworks.md`, set what you can, and tell them plainly which lines are not reachable through the plugin and what the effect is. Do not hand-roll a client to get at a missing option: the option can be added to the plugin, and a shim cannot.
+They describe what the connection should carry. A generated client can set all of it. The official plugins each expose a subset: as of 1.8.10 the LiveKit plugin covers almost everything except `punctuate`, `capitalize`, `external_session_id` and `full_transcript`, while the Pipecat plugin at 1.15.0 does not reach `eou_timeout_ms`, `endpointing_timeout_ms`, `vad_events`, `finalize_on_words`, `max_words`, `punctuate`, `capitalize` or `external_session_id`. Before promising a customer a profile line on LiveKit or Pipecat, check the exposed lists in `references/frameworks.md`, set what you can, and tell them plainly which lines are not reachable through the plugin and what the effect is. Do not hand-roll a client to get at a missing option: the option can be added to the plugin, and a shim cannot.
 
 ## Non-goals
 
