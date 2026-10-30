@@ -1,6 +1,6 @@
 # Pulse STT Features
 
-All features are enabled via query parameters on `POST /waves/v1/stt/` or the `wss://.../stt/live` connection URL.
+All features are enabled via query parameters on `POST /waves/v1/stt/` or the `wss://.../stt/live` connection URL. Not every feature produces output on both surfaces; the notes below say where one does not.
 
 | Feature | What it does | Docs |
 |---|---|---|
@@ -8,9 +8,9 @@ All features are enabled via query parameters on `POST /waves/v1/stt/` or the `w
 | Speaker diarization | Turn-by-turn speaker IDs on words and utterances | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/diarization |
 | Utterances | Sentence-level segments with speaker labels | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/utterances |
 | Language detection | Auto-detect across 38 languages | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/language-detection |
-| PII / PCI redaction | Auto-redact sensitive info from transcripts | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/redaction |
-| Emotion detection | Per-emotion confidence scores | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/emotion-detection |
-| Gender detection | Speaker gender prediction | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/gender-detection |
+| PII / PCI redaction | Auto-redact sensitive info from transcripts. The `redacted_entities` array does not arrive on streaming | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/redaction |
+| Emotion detection | Per-emotion confidence scores. **Pre-recorded only**: accepted on the streaming connection but no `emotion` field comes back | https://docs.smallest.ai/models/speech-to-text/features/emotion-detection |
+| Gender detection | Speaker gender prediction. **Pre-recorded only**: accepted on the streaming connection but no `gender` field comes back | https://docs.smallest.ai/models/speech-to-text/features/gender-detection |
 | Keyword boosting | Boost domain words/phrases for correct recognition | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/keyword-boosting |
 | Punctuation formatting | Control punctuation/capitalization in real time | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/punctuation-formatting |
 | Inverse text normalization | Spoken form → written form ("five dollars" → "$5") | https://docs.smallest.ai/waves/documentation/speech-to-text-pulse/features/inverse-text-normalization |
