@@ -73,7 +73,7 @@ Fixes, in order of impact:
 
 - ITN normalizes each final independently. A number spoken across a pause is normalized in pieces: "one two three, nine eight seven" finalized separately came back as `123.` and `987.` and then a merged `123987` later in the call.
 - On short-reply or digit-collection turns, set `itn_normalize=false` and convert on your side, where you know what the field expects.
-- `itn_normalize=false` on its own does not give you spoken-form numbers. `numerals` defaults to `auto` and still converts: with ITN off, "twenty five thousand rupees" came back as `25,000 rupees`.
+- `itn_normalize=false` does not guarantee spoken-form numbers. `numerals` acts independently of it, and with ITN off the same utterance has come back both as `25,000 rupees` and as "twenty five thousand rupees" depending on the rest of the connection. Do not build on either shape: read the digits as returned and parse them.
 - `numerals=false` is not a safe way to force words either. On a digit sequence it works ("one, two, three"), but on a compound number it mangles: "twenty five thousand" came back as `twenty-five,zero`, reproducible on every run. For digit collection, take the digits as returned and parse them rather than trying to get words back.
 - `numerals` is tri-state (`auto`, `true`, `false`), not a boolean.
 - ITN substitutes currency symbols, not just digits: "twenty five thousand rupees" comes back as `₹25000`, with the word "rupees" gone. Anything downstream that parses amounts by looking for the currency word will miss it.

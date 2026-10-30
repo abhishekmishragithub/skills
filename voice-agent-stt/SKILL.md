@@ -17,7 +17,7 @@ Wires Smallest AI's streaming STT into an existing voice agent in one pass. STT 
 >
 > **Only transcribing audio?** The `speech-to-text` skill covers the pre-recorded and plain streaming surfaces. This skill is for putting STT inside an agent that takes turns.
 
-Tested against `pipecat-ai` 1.12.0, `livekit-agents` 1.8.3 and `livekit-plugins-smallestai` 1.8.3 on 2026-09-29. If the installed version is newer, check the plugin's own parameter list before assuming the options below still match.
+Tested against `pipecat-ai` 1.15.0, `livekit-agents` 1.8.10 and `livekit-plugins-smallestai` 1.8.10 on 2026-10-30. Both plugins move quickly: read the installed version's own option list before telling a customer something is unreachable. If the installed version is newer, check the plugin's own parameter list before assuming the options below still match.
 
 ## Step 1. Detect the stack
 
@@ -51,7 +51,7 @@ Every generated client must:
 - Send binary PCM in the declared `encoding` at the declared `sample_rate`. No base64. Chunks of 20 to 40 ms.
 - Commit a user turn on any `is_final` message carrying a non-empty transcript, **including one with `is_last: true`**. A short final utterance often arrives only on the `is_last` message.
 - Ignore `is_final` messages with an empty transcript. They are normal.
-- Trim the leading space and any leading period from a transcript before sending it to the LLM. This applies to the official plugins too: they pass the transcript through unchanged.
+- Trim the leading space and any leading period from a transcript before sending it to the LLM. The Pipecat plugin already strips the space; the LiveKit plugin does not. A leading period survives on both.
 - Handle `{"type":"error"}` messages, which arrive after a successful WebSocket upgrade. A bad parameter or a region-gated language fails this way, not with an HTTP error.
 - Send `{"type":"ping"}` during silence and `{"type":"close_stream"}` at the end, then wait for `is_last` before closing the socket.
 - If the caller owns the turn boundary, keep streaming audio for at least 300 ms after their detector fires, then send `{"type":"finalize"}` once. Finalizing immediately truncates the last word.
@@ -142,11 +142,11 @@ Most telephony agents carry both: account numbers and open questions on the same
 
 `eou_timeout_ms` is left out of both profiles on purpose. It is not a latency control: time from end of speech to final is 0.8 to 1.0 s whatever it is set to. Below 500 it makes the server finalize before the last word is decoded, so a turn arrives split across two finals. Leave it unset. See `references/config-knobs.md`.
 
-**One exception.** The LiveKit plugin does not leave it unset: it defaults to `100` and always sends it, which is the value that splits words. On LiveKit, pass `eou_timeout_ms=800` explicitly.
+**One exception, on a different parameter.** The LiveKit plugin sends `endpointing_timeout=300` on every connection unless told otherwise, and at that value the server closes the segment mid-word. On LiveKit, pass `endpointing_timeout_ms=None`. See `references/frameworks.md`.
 
 ### These profiles are a server-side parameter list
 
-They describe what the connection should carry. A generated client can set all of it. The official plugins cannot: each exposes a subset, and `itn_normalize`, `vad_events` and `external_session_id` are exposed by neither. Before promising a customer a profile line on LiveKit or Pipecat, check the exposed lists in `references/frameworks.md`, set what you can, and tell them plainly which lines are not reachable through the plugin and what the effect is. Do not hand-roll a client to get at a missing option: the option can be added to the plugin, and a shim cannot.
+They describe what the connection should carry. A generated client can set all of it. The official plugins each expose a subset: as of 1.8.10 the LiveKit plugin covers almost everything except `punctuate`, `capitalize`, `external_session_id` and `full_transcript`, while the Pipecat plugin at 1.15.0 does not reach `eou_timeout_ms`, `vad_events`, `punctuate`, `capitalize`, `external_session_id` or `finalize_on_words`. Before promising a customer a profile line on LiveKit or Pipecat, check the exposed lists in `references/frameworks.md`, set what you can, and tell them plainly which lines are not reachable through the plugin and what the effect is. Do not hand-roll a client to get at a missing option: the option can be added to the plugin, and a shim cannot.
 
 ## Non-goals
 

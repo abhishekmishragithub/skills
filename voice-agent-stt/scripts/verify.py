@@ -76,7 +76,17 @@ async def run(args: argparse.Namespace) -> int:
         return 1
 
     # Match the customer's real audio format so the check exercises their path.
-    if args.encoding in TELEPHONY_SAMPLES:
+    if args.encoding in ("opus", "ogg_opus") and not args.sample:
+        sys.exit(f"verify: --encoding {args.encoding} needs --sample with your own encoded file. "
+                 f"ffmpeg -i in.wav -c:a libopus -b:a 32k -ar 16000 -ac 1 out.ogg")
+    if args.encoding in ("opus", "ogg_opus"):
+        asset = Path(args.sample)
+        if not asset.exists():
+            sys.exit(f"verify: {asset} not found")
+        audio = asset.read_bytes()
+        rate = int(args.sample_rate) if args.sample_rate else 16000
+        bytes_per_sample = 1          # paced by byte count, not sample count
+    elif args.encoding in TELEPHONY_SAMPLES:
         # G.711 is one byte per sample and already encoded, so nothing is read
         # from the 16 kHz WAV on this path. --sample takes a raw .ulaw/.alaw
         # file, which is how you check against your own call recording.
@@ -268,7 +278,7 @@ def main() -> int:
     p.add_argument("--finalize-on-words", default="false", choices=["true", "false"],
                    help="the profiles turn this off; the server default is true.")
     p.add_argument("--encoding", default="linear16",
-                   choices=["linear16", "mulaw", "alaw"],
+                   choices=["linear16", "linear32", "mulaw", "alaw", "opus", "ogg_opus"],
                    help="mulaw and alaw stream a pre-encoded 8 kHz sample, so a telephony "
                         "configuration is tested as it will actually run.")
     p.add_argument("--sample-rate", default=None,
